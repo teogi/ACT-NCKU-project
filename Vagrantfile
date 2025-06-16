@@ -63,39 +63,39 @@ Vagrant.configure("2") do |config|
   end
 
   # Setting up a victim VM (Linux)
-  config.vm.define "victim-linux" do |victim_linux|
-    victim_linux.vm.box = "generic/ubuntu2010"
-    victim_linux.vm.box_version = "202502.21.0"
-    victim_linux.vm.hostname = "victim-linux"
-    victim_linux.vm.network "private_network", ip: '192.168.5.4'
-
-    victim_linux.vm.provider "virtualbox" do |v|
-      v.name = "victim-linux"
-      v.cpus = 2
-      v.memory = 2048
-    end
-    victim_linux.vm.provision "shell", inline: <<-SHELL
-      # Putting target text file to be exfiltrated
-      echo "Advanced Cybersecurity Top Secret." > "C:/Users/vagrant/secret.txt"
-      # Setup graphical interface for victim Linux
-      apt-get update
-      apt-get install -y ubuntu-desktop
-      reboot now
-    SHELL
-  end
+  #config.vm.define "victim-linux" do |victim_linux|
+  #  victim_linux.vm.box = "generic/ubuntu2010"
+  #  victim_linux.vm.box_version = "202502.21.0"
+  #  victim_linux.vm.hostname = "victim-linux"
+  #  victim_linux.vm.network "private_network", ip: '192.168.5.4'
+#
+  #  victim_linux.vm.provider "virtualbox" do |v|
+  #    v.name = "victim-linux"
+  #    v.cpus = 2
+  #    v.memory = 2048
+  #  end
+  #  victim_linux.vm.provision "shell", inline: <<-SHELL
+  #    # Putting target text file to be exfiltrated
+  #    echo "Advanced Cybersecurity Top Secret." > "C:/Users/vagrant/secret.txt"
+  #    # Setup graphical interface for victim Linux
+  #    apt-get update
+  #    apt-get install -y ubuntu-desktop
+  #    reboot now
+  #  SHELL
+  #end
   
   # Setting up Metasploitable3 VM
-  config.vm.define "ub1404" do |ub1404|
-    ub1404.vm.box = "rapid7/metasploitable3-ub1404"
-    ub1404.vm.hostname = "metasploitable3-ub1404"
-  
-    ub1404.vm.network "private_network", ip: '192.168.5.4'
-   
-    ub1404.vm.provider "virtualbox" do |v|
-      v.name = "Metasploitable3-ub1404"
-      v.memory = 2048
-    end
-  end
+  #config.vm.define "ub1404" do |ub1404|
+  #  ub1404.vm.box = "rapid7/metasploitable3-ub1404"
+  #  ub1404.vm.hostname = "metasploitable3-ub1404"
+  #
+  #  ub1404.vm.network "private_network", ip: '192.168.5.4'
+  # 
+  #  ub1404.vm.provider "virtualbox" do |v|
+  #    v.name = "Metasploitable3-ub1404"
+  #    v.memory = 2048
+  #  end
+  #end
 
   #config.vm.define "win2k8" do |win2k8|
   #  # Base configuration for the VM and provisioner
