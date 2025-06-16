@@ -1,4 +1,5 @@
-# ACT-NCKU-project: Red Team Practice
+# ACT-NCKU-project
+## Red Team Practice
 
 VMs:
 1.	Kali Linux (attacker)
@@ -9,7 +10,7 @@ Tactic	Technique	Description
 Initial Access	Drive by Compromise	Watering hole attack by exploiting XSS vulnerability on DVMA, and letting target machine to access the vulnerability
 https://www.infosecinstitute.com/resources/application-security/watering-hole-attack-video-walkthrough/ 
 
-## Environment Setup
+### Environment Setup
 The environment Setup mostly done by Vagrant+VirtualBox configuration:
 - Attacker 
   - Distro: Kali Linux
@@ -25,7 +26,7 @@ The environment Setup mostly done by Vagrant+VirtualBox configuration:
 - Router (gateway between attacker & victim)
   - IP: 192.168.5.254/24 & 192.168.4.254/24
  
-## Initial Access
+### Initial Access
 On attacker, I set up the exploitation module of the Metasploit Framework: 
 
 Then, I exploit DVWA’s XSS (stored) vulnerability:
@@ -36,5 +37,5 @@ The script is stored at the webpage, waiting for the victim to access and trigge
 It will redirect the victim to the target website that leverage the vulnerability of IE 6, then send the reverse shell meterpreter payload.
 Though the browser will be crashed after the exploitation, so for the user might notices some flaws on this website.
 
-## Privilege Escalation
+### Privilege Escalation
 From the attacker side, the XSS attack success and migrates to specified System level process, the Meterpreter session also opened successfully. 
