@@ -78,11 +78,13 @@ Then, I exploit DVWA’s XSS (stored) vulnerability:
 
 Though the browser will be crashed after the exploitation, so for the user might notices some flaws on this website.
 
-### Execution - Command and Scripting Interpreter (T1059.001)
+### Execution - Command and Scripting Interpreter (T1059)
 
-After the victim accessed the compromised webpage, the reverse shell payload(meterpreter) is sent to the attacker.
+After the victim accessed the compromised webpage, the reverse shell payload(meterpreter) is sent to the attacker. Meterpreter can drop into a shell on the victim machine, allowing the attacker to execute commands remotely.
+![attacker](img/attacker_C2.png)
 
-### Privilege Escalation - Process Injection
+
+### Privilege Escalation - Process Injection (T1055)
 
 From the attacker side, the XSS attack success and migrates to specified System level process, the Meterpreter session also opened successfully.  
 ![msf compromising victim](img/attacker_compromised_victim.png)  
@@ -90,4 +92,16 @@ From the terminal, we can see the session is migrated from process `iexplore.exe
 
 ### Persistence - Boot or Logon Initialization Scripts
 
+After the attacker has compromised the victim, they can maintain access to the victim machine by creating a persistence mechanism. In this case, the attacker can use the Meterpreter session to run a script (`exploit/windows/local/persistence`) that will create a scheduled task to run the Meterpreter payload every time the victim machine boots up or logs in.
 ![Attacker persistence](img/attacker_persistence.png)
+
+### Discovery - System Information Discovery (T1082)
+
+After the attacker has compromised the victim, they can gather information about the victim machine. In this case, the attacker can use the Meterpreter session to gather system information such as OS version, architecture, and hostname.
+![Attacker discovery](img/attacker_discovery.png)
+
+### Exfiltration - Exfiltration Over Command and Control Channel (T1041)
+
+After the attacker has compromised the victim, they can exfiltrate data from the victim machine.
+I use `hashdump` command to dump the password hashes from the victim machine.
+![Attacker exfiltration](img/attacker_msf_hashdump.png)
