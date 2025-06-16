@@ -15,6 +15,10 @@ Vagrant.configure("2") do |config|
       v.cpus = 4
       v.memory = 4096
     end
+    attacker.vm.provision "shell", inline: <<-SHELL
+      # set up IP address (like seriously why is this not done automatically?)
+      ip addr add "192.168.5.2/24" dev "eth1"
+    SHELL
   end
 
   # Setting up DVWA VM (Ubuntu 22.04) as a vulnerable web application
@@ -24,7 +28,7 @@ Vagrant.configure("2") do |config|
     dvwa.vm.box_version = "202502.21.0"
 
     dvwa.vm.hostname = "dvwa"
-    dvwa.vm.network "private_network", ip: '192.168.5.5'
+    dvwa.vm.network "private_network", ip: '192.168.5.4'
     dvwa.vm.network "forwarded_port", guest: 80, host: 8080
 
     dvwa.vm.provider "virtualbox" do |v|
@@ -39,6 +43,33 @@ Vagrant.configure("2") do |config|
     SHELL
   end
 
+  # Setting up a gateway VM (Linux) for routing traffic
+  # between the attacker and victim VMs
+  config.vm.define "router" do |gateway|
+    gateway.vm.box = "bento/ubuntu-24.04"
+    gateway.vm.box_version = "202502.21.0"
+    gateway.vm.hostname = "router"
+    gateway.vm.network "private_network", ip: '192.168.4.254'
+    gateway.vm.network "private_network", ip: '192.168.5.254'
+
+    gateway.vm.provider "virtualbox" do |v|
+      v.name = "router"
+      v.cpus = 2
+      v.memory = 2048
+    end
+
+    gateway.vm.provision "shell", inline: <<-SHELL
+      # Enable IP forwarding
+      #echo 1 > /proc/sys/net/ipv4/ip_forward
+      # Install Suricata
+      apt-get install software-properties-common
+      add-apt-repository ppa:oisf/suricata-stable
+      apt-get update
+      apt-get install suricata
+      apt-get install -y suricata
+    SHELL
+  end
+
   # Setting up a victim VM (Windows XP) for demonstrating
   # Drive-by Compromises,
   # exploiting vulnerabilities in Internet Explorer
@@ -46,7 +77,7 @@ Vagrant.configure("2") do |config|
     victim.vm.box = "dvgamerr/win-xp-sp3"
     victim.vm.box_version = "2.0"
     victim.vm.hostname = "victim"
-    victim.vm.network "private_network", ip: '192.168.5.3'
+    victim.vm.network "private_network", ip: '192.168.4.4'
     victim.ssh.username = 'vagrant'
     victim.ssh.password = 'vagrant'
 
@@ -61,65 +92,5 @@ Vagrant.configure("2") do |config|
       echo "Advanced Cybersecurity Top Secret." > "C:/Users/vagrant/secret.txt"
     SHELL
   end
-
-  # Setting up a victim VM (Linux)
-  #config.vm.define "victim-linux" do |victim_linux|
-  #  victim_linux.vm.box = "generic/ubuntu2010"
-  #  victim_linux.vm.box_version = "202502.21.0"
-  #  victim_linux.vm.hostname = "victim-linux"
-  #  victim_linux.vm.network "private_network", ip: '192.168.5.4'
-#
-  #  victim_linux.vm.provider "virtualbox" do |v|
-  #    v.name = "victim-linux"
-  #    v.cpus = 2
-  #    v.memory = 2048
-  #  end
-  #  victim_linux.vm.provision "shell", inline: <<-SHELL
-  #    # Putting target text file to be exfiltrated
-  #    echo "Advanced Cybersecurity Top Secret." > "C:/Users/vagrant/secret.txt"
-  #    # Setup graphical interface for victim Linux
-  #    apt-get update
-  #    apt-get install -y ubuntu-desktop
-  #    reboot now
-  #  SHELL
-  #end
-  
-  # Setting up Metasploitable3 VM
-  #config.vm.define "ub1404" do |ub1404|
-  #  ub1404.vm.box = "rapid7/metasploitable3-ub1404"
-  #  ub1404.vm.hostname = "metasploitable3-ub1404"
-  #
-  #  ub1404.vm.network "private_network", ip: '192.168.5.4'
-  # 
-  #  ub1404.vm.provider "virtualbox" do |v|
-  #    v.name = "Metasploitable3-ub1404"
-  #    v.memory = 2048
-  #  end
-  #end
-
-  #config.vm.define "win2k8" do |win2k8|
-  #  # Base configuration for the VM and provisioner
-  #  win2k8.vm.box = "rapid7/metasploitable3-win2k8"
-  #  win2k8.vm.hostname = "metasploitable3-win2k8"
-  #  win2k8.vm.communicator = "winrm"
-  #  win2k8.winrm.retry_limit = 60
-  #  win2k8.winrm.retry_delay = 10
-#
-  #  win2k8.vm.network "private_network", ip: '192.168.5.5'
-#
-  #  # Configure Firewall to open up vulnerable services
-  #  case ENV['MS3_DIFFICULTY']
-  #    when 'easy'
-  #      win2k8.vm.provision :shell, inline: "C:\\startup\\disable_firewall.bat"
-  #    else
-  #      win2k8.vm.provision :shell, inline: "C:\\startup\\enable_firewall.bat"
-  #      win2k8.vm.provision :shell, inline: "C:\\startup\\configure_firewall.bat"
-  #  end
-#
-  #  # Insecure share from the Linux machine
-  #  win2k8.vm.provision :shell, inline: "C:\\startup\\install_share_autorun.bat"
-  #  win2k8.vm.provision :shell, inline: "C:\\startup\\setup_linux_share.bat"
-  #  win2k8.vm.provision :shell, inline: "rm C:\\startup\\*" # Cleanup startup scripts
-  #end
 
 end
