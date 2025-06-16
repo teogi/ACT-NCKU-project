@@ -3,9 +3,22 @@
 ## Prerequisites
 
 - [Vagrant](https://www.vagrantup.com/downloads) (version 2.4.5)
-- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (version 6.1.40) (tested with 7.1.8, but should work with other hypervisors like VMware, Hyper-V, etc.)
+- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (version 7.1.8) (tested with VirtualBox, but should work with other hypervisors like VMware, Hyper-V, etc.)
 
 ## Red Team Practice
+
+### Kill Chain
+
+![Kill Chain](img/kill_chain.png)  
+The Red Team practice is based on the MITRE ATT&CK framework, which is a knowledge base of adversary tactics and techniques based on real-world observations.
+The practice follows the steps of the kill chain, which is a model for understanding the stages of a cyber attack. The steps are:
+
+1. **Initial Access**: Gain initial access to the target system.
+2. **Execution**: Execute malicious code on the target system.
+3. **Persistence**: Maintain access to the target system.
+4. **Privilege Escalation**: Gain higher privileges on the target system.
+5. **Discovery**: Discover information about the target system.
+6. **Exfiltration**: Exfiltrate data from the target system.
 
 ### Environment Setup
 
@@ -26,7 +39,9 @@ The environment setup mostly done by Vagrant+VirtualBox configuration:
 - Router (gateway between attacker & victim)
   - IP: 192.168.5.254/24 & 192.168.4.254/24
 
-### Initial Access
+### Initial Access - Drive-by Compromise (T1189)
+
+The initial access is done by exploiting a vulnerability in Internet Explorer 6, which is a browser that is no longer supported by Microsoft and has many known vulnerabilities.
 
 On attacker, I set up the exploitation module of the Metasploit Framework:  
 ![start the msfconsole](img/attacker_msfconsole.png)  
@@ -40,7 +55,7 @@ Below is the description of the vulnerability:
 >> discovered being used in-the-wild and was previously known as the "iepeers"  
 >> vulnerability. The name comes from Microsoft's suggested workaround to block  
 >> access to the iepeers.dll file.  
->>  
+>>
 >> According to Nico Waisman, "The bug itself is when trying to persist an object  
 >> using the setAttribute, which end up calling VariantChangeTypeEx with both the  
 >> source and the destination being the same variant. So if you send as a variant  
@@ -63,7 +78,16 @@ Then, I exploit DVWA’s XSS (stored) vulnerability:
 
 Though the browser will be crashed after the exploitation, so for the user might notices some flaws on this website.
 
-### Privilege Escalation
+### Execution - Command and Scripting Interpreter (T1059.001)
+
+After the victim accessed the compromised webpage, the reverse shell payload(meterpreter) is sent to the attacker.
+
+### Privilege Escalation - Process Injection
 
 From the attacker side, the XSS attack success and migrates to specified System level process, the Meterpreter session also opened successfully.  
-![msf compromising victim](img/attacker_compromised_victim.png)
+![msf compromising victim](img/attacker_compromised_victim.png)  
+From the terminal, we can see the session is migrated from process `iexplore.exe` to process `services.exe` by using the `InitialAutoRunScript 'post/windows/manage/priv_migrate'` command. Migration is done by injecting the Meterpreter payload into the target process's memory space.
+
+### Persistence - Boot or Logon Initialization Scripts
+
+![Attacker persistence](img/attacker_persistence.png)
